@@ -1,0 +1,42 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+
+namespace Lotte
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            using (WebClient client = new WebClient())
+            {
+
+                byte[] response =
+                client.UploadValues("https://ketqua.net/so-ket-qua", new NameValueCollection()
+                {
+                       { "code", "qng" },
+                       { "date", "7-9-2020" },
+                       { "count", "60" }
+                });
+
+                string result = System.Text.Encoding.UTF8.GetString(response);
+
+                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(result);
+
+                List<List<string>> table = doc.DocumentNode.SelectNodes("//table[@id='result_tab_qng']")
+                            .Descendants("tr")
+                            .Where(tr => tr.Elements("td").Count() > 1)
+                            .Select(tr => tr.Elements("td").Select(td => td.InnerText.Trim()).ToList())
+                            .ToList();
+            }
+
+            //WebClient webClient = new WebClient();
+            //string page = webClient.DownloadString("http://www.mufap.com.pk/payout-report.php?tab=01");
+
+        }
+    }
+}
